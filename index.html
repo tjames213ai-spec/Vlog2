@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOKYO CONTACTS - Visit Log Manager</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts: Noto Serif JP & Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;700;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#d91b42',
+                            redDark: '#b21333',
+                            bgDark: '#121212',
+                            cardBg: '#f8f9fa',
+                            inputBg: '#edf0f4'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Noto Serif JP"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #121212;
+            color: #1a1d20;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .font-wa {
+            font-family: 'Noto Serif JP', serif;
+        }
+
+        .main-card {
+            background-color: #f8f9fa;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        @media (min-width: 640px) {
+            .main-card {
+                border-radius: 20px;
+            }
+        }
+
+        .input-box {
+            background-color: #ffffff;
+            border: 1px solid #dcdfe4;
+            color: #111827;
+            transition: all 0.2s ease;
+        }
+        .input-box:focus {
+            border-color: #d91b42;
+            box-shadow: 0 0 0 3px rgba(217, 27, 66, 0.15);
+            outline: none;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #e2e8f0;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #d91b42;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col custom-scrollbar antialiased bg-[#121212]">
+
+    <!-- Navigation Header -->
+    <header class="bg-[#121212] pt-4 pb-3 px-3 sm:px-6 border-b border-neutral-800">
+        <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            
+            <div>
+                <h1 class="text-xl sm:text-2xl font-black tracking-widest text-white font-serif flex items-center gap-2">
+                    TOKYO <span class="text-[#d91b42] font-sans font-extrabold">CONTACTS</span>
+                </h1>
+                <p class="text-[10px] font-mono text-neutral-400 tracking-widest mt-0.5">VISIT LOG / 訪問記録管理</p>
+            </div>
+
+            <!-- Header Action Controls & Tab Nav -->
+            <div class="flex items-center justify-between w-full sm:w-auto gap-2.5">
+                
+                <!-- Cloud Backup Pill Button -->
+                <button type="button" onclick="triggerDataBackup()" class="px-2.5 py-1.5 rounded-xl bg-[#1a2332] border border-[#2b3952] text-slate-200 text-xs font-semibold flex items-center gap-2 hover:bg-[#232f42] transition shadow-md">
+                    <i class="fa-solid fa-cloud text-sky-400 text-xs"></i>
+                    <div class="text-left leading-tight">
+                        <span class="block text-[9px] font-mono text-slate-400 uppercase">BACKUP</span>
+                        <span class="block text-[9px] text-slate-200">データの保存</span>
+                    </div>
+                </button>
+
+                <!-- Navigation Tabs -->
+                <nav class="flex space-x-1 bg-[#1c1c1c] p-1 rounded-xl border border-neutral-800">
+                    <button type="button" id="tab-log-btn" onclick="switchTab('log')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-col items-center bg-[#d91b42] text-white shadow-md">
+                        <i class="fa-solid fa-user-plus text-[11px]"></i>
+                        <span class="text-[9px] mt-0.5">新規</span>
+                    </button>
+                    <button type="button" id="tab-list-btn" onclick="switchTab('list')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-col items-center text-neutral-400 hover:text-white">
+                        <i class="fa-solid fa-users text-[11px]"></i>
+                        <span class="text-[9px] mt-0.5">一覧</span>
+                    </button>
+                    <button type="button" id="tab-calendar-btn" onclick="switchTab('calendar')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-col items-center text-neutral-400 hover:text-white">
+                        <i class="fa-solid fa-calendar-days text-[11px]"></i>
+                        <span class="text-[9px] mt-0.5">カレンダー</span>
+                    </button>
+                </nav>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-5xl w-full mx-auto sm:py-3 sm:px-4">
+
+        <!-- TAB 1: RECORD NEW VISIT FORM -->
+        <section id="view-log" class="space-y-4">
+            <div class="main-card p-4 sm:p-6 text-neutral-900 min-h-[80vh]">
+                
+                <!-- Form Header -->
+                <div class="border-b border-slate-200 pb-3 mb-4">
+                    <h2 class="text-xl font-extrabold text-neutral-900 flex items-center gap-2 font-serif">
+                        <span class="text-[#d91b42] font-sans text-xl">+</span> NEW CONTACT
+                    </h2>
+                    <p class="text-[11px] font-semibold text-neutral-500">新規訪問先の登録</p>
+                </div>
+
+                <form id="new-visit-form" onsubmit="handleNewVisitSubmit(event)" class="space-y-4">
+                    
+                    <!-- 1. VISIT DATE & TIME -->
+                    <div class="bg-slate-100/80 p-3 rounded-xl border border-slate-200">
+                        <label for="entry-date" class="block text-[11px] font-bold text-neutral-800 uppercase tracking-wider mb-0.5">
+                            VISIT DATE & TIME
+                        </label>
+                        <span class="block text-[10px] text-neutral-500 mb-1.5">初回訪問日時</span>
+                        
+                        <div class="grid grid-cols-2 gap-2 sm:gap-3">
+                            <input type="date" id="entry-date" name="entryDate" class="input-box w-full rounded-lg px-3 py-1.5 text-xs font-semibold" required>
+                            <input type="time" id="entry-time" name="entryTime" value="14:00" class="input-box w-full rounded-lg px-3 py-1.5 text-xs font-semibold">
+                        </div>
+                    </div>
+
+                    <!-- 2. NAME -->
+                    <div>
+                        <label for="entry-name" class="block text-[11px] font-bold text-neutral-800 uppercase tracking-wider mb-0.5">
+                            NAME
+                        </label>
+                        <span class="block text-[10px] text-neutral-500 mb-1">お名前</span>
+                        <input type="text" id="entry-name" name="entryName" class="input-box w-full rounded-lg px-3 py-2 text-xs font-medium" placeholder="真理　愛" required>
+                    </div>
+
+                    <!-- 3. AREA -->
+                    <div>
+                        <label for="entry-area" class="block text-[11px] font-bold text-neutral-800 uppercase tracking-wider mb-0.5">
+                            AREA
+                        </label>
+                        <span class="block text-[10px] text-neutral-500 mb-1">エリア（地名・地区）</span>
+                        <input type="text" id="entry-area" name="entryArea" class="input-box w-full rounded-lg px-3 py-2 text-xs font-medium" placeholder="瑞江" required>
+                    </div>
+
+                    <!-- 4. ADDRESS DETAILS & MAP PREVIEW -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-baseline">
+                            <div>
+                                <label for="entry-address" class="block text-[11px] font-bold text-neutral-800 uppercase tracking-wider mb-0.5">
+                                    ADDRESS DETAILS
+                                </label>
+                                <span class="block text-[10px] text-neutral-500">住所詳細 & 部屋番号（マップ連動）</span>
+                            </div>
+                            <a id="google-maps-external-link" href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer" 
+                                class="text-xs text-[#d91b42] hover:underline font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-map-location-dot"></i> Googleマップで開く <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                            </a>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <input type="text" id="entry-address" name="entryAddress" oninput="updateNewVisitMap()" class="input-box w-full rounded-lg px-3 py-2 text-xs font-medium" placeholder="住所詳細or建物名">
+                            <input type="text" id="entry-room" name="entryRoom" class="input-box w-28 rounded-lg px-3 py-2 text-xs font-medium shrink-0" placeholder="部屋番号 (例: 101)">
+                            <button type="button" onclick="updateNewVisitMap()" class="bg-neutral-800 hover:bg-neutral-900 text-white px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition flex items-center gap-1 shrink-0">
+                                <i class="fa-solid fa-magnifying-glass text-amber-400 text-xs"></i> マップ更新
+                            </button>
+                        </div>
+
+                        <!-- Embedded Google Maps View Container -->
+                        <div class="pt-1">
+                            <div id="new-visit-map-container" class="h-52 w-full rounded-xl border border-slate-300 bg-slate-200 overflow-hidden relative shadow-inner">
+                                <div id="new-visit-map-placeholder" class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-slate-500 bg-slate-100">
+                                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-300 text-[#d91b42] flex items-center justify-center text-lg mb-2 shadow-sm">
+                                        <i class="fa-solid fa-map-location-dot"></i>
+                                    </div>
+                                    <p class="text-xs font-bold text-slate-700">住所または建物名を入力すると、ここにGoogleマップが表示されます。</p>
+                                </div>
+                                <iframe id="new-visit-map-iframe" class="w-full h-full border-0 hidden" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. VISIT PURPOSE -->
+                    <div>
+                        <label for="entry-type" class="block text-[11px] font-bold text-neutral-800 uppercase tracking-wider mb-0.5">
+                            VISIT PURPOSE
+                        </label>
+                        <span class="block text-[10px] text-neutral-500 mb-1">訪問種別</span>
+                        <select id="entry-type" name="entryType" class="input-box w-full rounded-lg px-3 py-2 text-xs font-medium">
+                            <option value="Initial" selected>初回 (Initial Visit)</option>
+                            <option value="Re-visit">再訪問 (Follow-up Visit)</option>
+                            <option value="Lesson">レッスン (Lesson Session)</option>
+                        </select>
+                    </div>
+
+                    <!-- 6. GENDER, AGE, INTEREST -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label for="entry-gender" class="block text-[11px] font-bold text-neutral-800 uppercase tracking-wider mb-0.5">
+                                GENDER
+                            </label>
+                            <span class="block text-[10px] text-neutral-500 mb-1">性別</span>
+                            <select id="entry-gender" name="entryGender" class="input-box w-full rounded-lg px-3 py-2 text-xs font-medium">
+                                <option value="Unspecified">未選択 (Unspecified)</option>
+                                <option value="Male">男性 (Male)</option>
+                                <option value="Female">女性 (Female)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="entry-age" class="block text-[11px] font-bold text-neutral-800 uppercase tracking-wider mb-0.5">
+                                AGE
+                            </label>
+                            <span class="block text-[10px] text-neutral-500 mb-1">年齢層</span>
+                            <select id="entry-age" name="entryAge" class="input-box w-full rounded-lg px-3 py-2 text-xs font-medium">
+                                <option value="10s">10代</option>
+                                <option value="20s">20代</option>
+                                <option value="30s">30代</option>
+                                <option value="40s">40代</option>
+                                <option value="50s" selected>50代</option>
+                                <option value="60s">60代</option>
+                                <option value="70s+">70代以上</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="entry-interest" class="block text-[11px] font-bold text-neutral-800 uppercase tracking-wider mb-0.5">
+                                INTEREST
+                            </label>
+                            <span class="block text-[10px] text-neutral-500 mb-1">関心度</span>
+                            <select id="entry-interest" name="entryInterest" class="input-box w-full rounded-lg px-3 py-2 text-xs font-bold text-[#d91b42]">
+                                <option value="A">Level A (極めて高い)</option>
+                                <option value="B">Level B (高い)</option>
+                                <option value="C" selected>Level C (普通)</option>
+                                <option value="D">Level D (低い)</option>
+                                <option value="E">Level E (要観察)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 7. CONVERSATION NOTES -->
+                    <div>
+                        <label for="entry-notes" class="block text-[11px] font-bold text-neutral-800 uppercase tracking-wider mb-0.5">
+                            NOTES
+                        </label>
+                        <span class="block text-[10px] text-neutral-500 mb-1">会話内容</span>
+                        <textarea id="entry-notes" name="entryNotes" rows="3" class="input-box w-full rounded-lg p-3 text-xs font-medium custom-scrollbar" placeholder="会話の内容詳細"></textarea>
+                    </div>
+
+                    <!-- 8. NEXT VISIT -->
+                    <div>
+                        <label for="entry-next-plan" class="block text-[11px] font-bold text-neutral-800 uppercase tracking-wider mb-0.5">
+                            NEXT VISIT
+                        </label>
+                        <span class="block text-[10px] text-neutral-500 mb-1">次回の訪問</span>
+                        <input type="text" id="entry-next-plan" name="entryNextPlan" class="input-box w-full rounded-lg px-3 py-2 text-xs font-medium" placeholder="再訪問計画詳細">
+                    </div>
+
+                    <!-- 9. PDF ATTACHMENT -->
+                    <div>
+                        <label for="entry-pdf" class="block text-[11px] font-bold text-neutral-800 uppercase tracking-wider mb-0.5">
+                            ATTACHMENT PDF
+                        </label>
+                        <span class="block text-[10px] text-neutral-500 mb-1">関連資料 (PDFファイル上限 1.5MB まで推奨)</span>
+                        <div class="flex items-center gap-3 bg-slate-100 p-2.5 rounded-lg border border-slate-300">
+                            <input type="file" id="entry-pdf" name="entryPdf" accept="application/pdf" class="text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-[#d91b42] file:text-white hover:file:bg-[#b21333] cursor-pointer">
+                        </div>
+                    </div>
+
+                    <!-- Form Action Button -->
+                    <div class="pt-2 flex justify-end">
+                        <button type="submit" class="w-full sm:w-auto bg-[#d91b42] hover:bg-[#b21333] text-white font-bold px-8 py-2.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-xs tracking-wider">
+                            <i class="fa-solid fa-check"></i> SAVE RECORD / 保存する
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- TAB 2: VISITED CONTACTS DIRECTORY -->
+        <section id="view-list" class="space-y-4 hidden">
+            <div class="main-card p-4 sm:p-6 text-neutral-900 min-h-[80vh]">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-slate-200 pb-3 mb-4">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-neutral-900 flex items-center gap-2 font-serif">
+                            DIRECTORY / <span class="text-xs font-sans font-bold text-slate-600">訪問先一覧</span>
+                        </h2>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                        <div>
+                            <label for="sort-area" class="sr-only">エリア絞り込み</label>
+                            <select id="sort-area" onchange="renderContactsList()" class="input-box rounded-lg px-2.5 py-1.5 text-xs font-semibold">
+                                <option value="all">すべてのエリア</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="sort-interest" class="sr-only">関心レベル絞り込み</label>
+                            <select id="sort-interest" onchange="renderContactsList()" class="input-box rounded-lg px-2.5 py-1.5 text-xs font-semibold">
+                                <option value="all">関心レベル: すべて</option>
+                                <option value="A">Level A Only</option>
+                                <option value="B">Level B Only</option>
+                                <option value="C">Level C Only</option>
+                                <option value="D">Level D Only</option>
+                                <option value="E">Level E Only</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="sort-mode" class="sr-only">並び替え順序</label>
+                            <select id="sort-mode" onchange="renderContactsList()" class="input-box rounded-lg px-2.5 py-1.5 text-xs font-semibold">
+                                <option value="today" selected>本日の予定優先</option>
+                                <option value="priority">レッスン優先</option>
+                                <option value="area">エリア順</option>
+                                <option value="interest">関心度高順</option>
+                                <option value="elapsed">経過日数順</option>
+                            </select>
+                        </div>
+
+                        <div class="relative w-full sm:w-44">
+                            <label for="search-input" class="sr-only">訪問先検索</label>
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2 text-slate-400 text-xs"></i>
+                            <input type="text" id="search-input" onkeyup="renderContactsList()" placeholder="検索..."
+                                class="input-box w-full rounded-lg pl-8 pr-3 py-1.5 text-xs font-medium">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="contacts-container" class="grid grid-cols-1 gap-1.5"></div>
+            </div>
+        </section>
+
+        <!-- TAB 3: MONTHLY CALENDAR -->
+        <section id="view-calendar" class="space-y-4 hidden">
+            <div class="main-card p-3 sm:p-5 text-neutral-900 min-h-[80vh]">
+                
+                <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+                    <button type="button" onclick="changeMonth(-1)" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 rounded-lg text-xs font-bold text-neutral-800 transition flex items-center gap-1">
+                        <i class="fa-solid fa-chevron-left text-[9px]"></i> 前月
+                    </button>
+                    <h2 id="calendar-month-title" class="text-base sm:text-lg font-black text-neutral-900 font-serif tracking-wider">
+                        ----年 --月
+                    </h2>
+                    <button type="button" onclick="changeMonth(1)" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 rounded-lg text-xs font-bold text-neutral-800 transition flex items-center gap-1">
+                        次月 <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-7 text-center text-[10px] font-bold py-1 border-b border-slate-200 bg-slate-50 rounded-lg mb-1">
+                    <span class="text-slate-700">月 <span class="text-[8px] text-slate-400 font-normal">MON</span></span>
+                    <span class="text-slate-700">火 <span class="text-[8px] text-slate-400 font-normal">TUE</span></span>
+                    <span class="text-slate-700">水 <span class="text-[8px] text-slate-400 font-normal">WED</span></span>
+                    <span class="text-slate-700">木 <span class="text-[8px] text-slate-400 font-normal">THU</span></span>
+                    <span class="text-slate-700">金 <span class="text-[8px] text-slate-400 font-normal">FRI</span></span>
+                    <span class="text-sky-600">土 <span class="text-[8px] text-sky-400 font-normal">SAT</span></span>
+                    <span class="text-rose-600">日 <span class="text-[8px] text-rose-400 font-normal">SUN</span></span>
+                </div>
+
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1 mt-1"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- CONTACT DETAIL MODAL -->
+    <div id="detail-modal" onclick="handleOverlayClick(event, 'detail-modal')" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3">
+        <div class="bg-white text-neutral-900 w-full max-w-2xl max-h-[92vh] rounded-2xl flex flex-col overflow-hidden shadow-2xl border border-slate-200">
+            
+            <div class="p-4 border-b border-slate-200 flex justify-between items-start bg-slate-50">
+                <div class="space-y-0.5">
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <h3 id="modal-client-name" class="text-xl font-bold font-serif text-neutral-900">---</h3>
+                        <span id="modal-client-type-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                            ---
+                        </span>
+                        <!-- Toggle Today Schedule Button in Modal -->
+                        <button type="button" id="modal-today-toggle-btn" onclick="toggleTodayScheduleFromModal()" class="px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                            <!-- Dynamic Content -->
+                        </button>
+                        <button type="button" onclick="openEditClientModal()" class="w-7 h-7 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-bold transition flex items-center justify-center shrink-0" title="基本情報を編集">
+                            <i class="fa-solid fa-pen-to-square text-xs text-[#d91b42]"></i>
+                        </button>
+                    </div>
+                    <p id="modal-client-area" class="text-xs text-slate-600 flex items-center gap-1 font-medium">
+                        <i class="fa-solid fa-location-dot text-[#d91b42]"></i> ---
+                    </p>
+                </div>
+                <button type="button" onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-4 sm:p-5 overflow-y-auto space-y-4 custom-scrollbar">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-100 p-3 rounded-xl border border-slate-200">
+                    <div>
+                        <span class="block text-[10px] font-bold text-slate-500 uppercase">Gender / Age</span>
+                        <span id="modal-client-demographics" class="text-xs font-bold text-neutral-800 flex items-center gap-1.5 mt-0.5">---</span>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] font-bold text-slate-500 uppercase">Elapsed Days</span>
+                        <span id="modal-client-elapsed" class="text-xs font-bold text-[#d91b42]">---</span>
+                    </div>
+                    <div>
+                        <label for="modal-interest-select" class="block text-[10px] font-bold text-[#d91b42] uppercase mb-0.5">Interest Level (Update)</label>
+                        <select id="modal-interest-select" onchange="updateClientInterestLevel()" class="w-full bg-white border border-[#d91b42] rounded-lg px-2.5 py-1 text-xs font-bold text-neutral-900 outline-none">
+                            <option value="A">Level A (極めて高い)</option>
+                            <option value="B">Level B (高い)</option>
+                            <option value="C">Level C (普通)</option>
+                            <option value="D">Level D (低い)</option>
+                            <option value="E">Level E (要観察)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <h4 class="text-[11px] font-bold text-neutral-800 uppercase tracking-wider">
+                            LOCATION & MAP / 住所詳細 & Googleマップ
+                        </h4>
+                        <a id="modal-google-maps-link" href="#" target="_blank" rel="noopener noreferrer" class="text-xs text-[#d91b42] hover:underline font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-map-location-dot"></i> Googleマップで見る <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                        </a>
+                    </div>
+                    <p id="modal-client-address" class="text-xs font-medium text-neutral-800 mb-2 bg-slate-100 p-2.5 rounded-lg border border-slate-200">---</p>
+                    
+                    <div class="h-44 w-full rounded-xl border border-slate-300 bg-slate-200 overflow-hidden relative">
+                        <iframe id="modal-visit-map-iframe" class="w-full h-full border-0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-[11px] font-bold text-neutral-800 uppercase tracking-wider mb-2 border-b border-slate-200 pb-1.5 flex items-center justify-between">
+                        <span><i class="fa-solid fa-clock-rotate-left text-[#d91b42]"></i> VISIT HISTORY LOG / 訪問履歴一覧</span>
+                    </h4>
+
+                    <div id="visit-history-list" class="space-y-2.5"></div>
+                </div>
+
+                <!-- FORM: ADD SUBSEQUENT VISIT -->
+                <div class="bg-slate-100 p-4 rounded-xl border border-slate-200 space-y-3">
+                    <h4 class="text-xs font-bold text-[#d91b42] font-serif flex items-center gap-1.5">
+                        <i class="fa-solid fa-calendar-plus"></i> ADD FOLLOW-UP VISIT / 2回目以降の訪問記録追加
+                    </h4>
+                    
+                    <form id="followup-form" onsubmit="handleFollowupSubmit(event)" class="space-y-3">
+                        
+                        <!-- VISIT DATE & TIME -->
+                        <div class="bg-white p-2.5 rounded-lg border border-slate-200">
+                            <label for="followup-date" class="block text-[10px] font-bold text-neutral-800 uppercase tracking-wider mb-0.5">
+                                VISIT DATE & TIME
+                            </label>
+                            <span class="block text-[9px] text-neutral-500 mb-1">訪問日時</span>
+                            
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="date" id="followup-date" name="followupDate" class="input-box w-full rounded-lg px-2.5 py-1.5 text-xs font-semibold" required>
+                                <input type="time" id="followup-time" name="followupTime" value="14:00" class="input-box w-full rounded-lg px-2.5 py-1.5 text-xs font-semibold">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="followup-type" class="block text-[10px] font-bold text-slate-700 mb-0.5">PURPOSE / 種別</label>
+                            <select id="followup-type" name="followupType" class="input-box w-full rounded-lg px-2.5 py-1.5 text-xs font-semibold">
+                                <option value="Re-visit" selected>再訪問 (Follow-up Visit)</option>
+                                <option value="Lesson">レッスン (Lesson Session)</option>
+                                <option value="Initial">初回 (Initial Visit)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="followup-notes" class="block text-[10px] font-bold text-slate-700 mb-0.5">NOTES / 会話内容</label>
+                            <textarea id="followup-notes" name="followupNotes" rows="2.5" class="input-box w-full rounded-lg p-2.5 text-xs font-medium custom-scrollbar" placeholder="会話の内容詳細"></textarea>
+                        </div>
+
+                        <div>
+                            <label for="followup-next-plan" class="block text-[10px] font-bold text-slate-700 mb-0.5">NEXT ACTION / 次回の訪問内容・予定</label>
+                            <input type="text" id="followup-next-plan" name="followupNextPlan" class="input-box w-full rounded-lg px-2.5 py-1.5 text-xs font-medium" placeholder="再訪問計画詳細">
+                        </div>
+
+                        <div>
+                            <label for="followup-pdf" class="block text-[10px] font-bold text-slate-700 mb-0.5">ATTACHMENT PDF / 関連資料 (上限 1.5MB)</label>
+                            <input type="file" id="followup-pdf" name="followupPdf" accept="application/pdf" class="text-xs text-slate-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:bg-[#d91b42] file:text-white cursor-pointer w-full">
+                        </div>
+
+                        <div class="flex justify-end pt-1">
+                            <button type="submit" class="bg-[#d91b42] hover:bg-[#b21333] text-white font-bold text-xs px-5 py-2 rounded-lg shadow-md transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> Save Follow-up Record
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Danger Zone: Delete Profile -->
+                <div class="border-t border-slate-200 pt-3 flex justify-between items-center">
+                    <span class="text-[10px] text-slate-500 font-mono">ID: <span id="modal-client-id">---</span></span>
+                    <button type="button" onclick="confirmDeleteClient()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300 text-xs font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can text-[11px]"></i> プロファイルを削除
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- BACKUP / RESTORE MODAL -->
+    <div id="backup-modal" onclick="handleOverlayClick(event, 'backup-modal')" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3">
+        <div class="bg-white max-w-sm w-full p-5 rounded-2xl border border-slate-200 shadow-2xl space-y-4 text-neutral-900">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-2">
+                <h3 class="text-base font-bold font-serif flex items-center gap-2">
+                    <i class="fa-solid fa-cloud text-sky-600"></i> DATA BACKUP / RESTORE
+                </h3>
+                <button type="button" onclick="closeBackupModal()" class="text-slate-400 hover:text-slate-700 w-7 h-7 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div class="p-3 bg-sky-50 border border-sky-200 rounded-xl space-y-1.5">
+                    <h4 class="font-bold text-sky-900 flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> データの保存 (エクスポート)
+                    </h4>
+                    <p class="text-slate-600 text-[11px]">現在の登録・訪問記録データをファイルとしてダウンロード保存します。</p>
+                    <button type="button" onclick="exportDataJSON()" class="w-full py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg transition shadow-sm flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-file-export"></i> データの保存
+                    </button>
+                </div>
+
+                <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-1.5">
+                    <h4 class="font-bold text-amber-900 flex items-center gap-1.5">
+                        <i class="fa-solid fa-upload"></i> データの復元 (インポート)
+                    </h4>
+                    <p class="text-slate-600 text-[11px]">保存済みのバックアップ(JSON)ファイルからデータを復元します。</p>
+                    <label for="import-json-file" class="sr-only">JSONファイルの選択</label>
+                    <input type="file" id="import-json-file" accept=".json,application/json" onchange="importDataJSON(event)" class="text-xs text-slate-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:bg-amber-600 file:text-white cursor-pointer w-full">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT CLIENT BASIC INFO MODAL -->
+    <div id="edit-client-modal" onclick="handleOverlayClick(event, 'edit-client-modal')" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3">
+        <div class="bg-white max-w-md w-full p-5 rounded-2xl border border-slate-200 shadow-2xl space-y-3 text-neutral-900 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-2">
+                <h3 class="text-base font-bold font-serif flex items-center gap-2">
+                    <i class="fa-solid fa-user-pen text-[#d91b42]"></i> EDIT CLIENT INFO / 基本情報の再編集
+                </h3>
+                <button type="button" onclick="closeEditClientModal()" class="text-slate-400 hover:text-slate-700">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="edit-client-form" onsubmit="handleSaveClientBasicInfo(event)" class="space-y-3 text-left">
+                <div>
+                    <label for="edit-client-name" class="block text-xs font-bold text-slate-700 mb-0.5">お名前</label>
+                    <input type="text" id="edit-client-name" name="editClientName" class="input-box w-full rounded-lg px-3 py-1.5 text-xs font-medium" placeholder="真理　愛" required>
+                </div>
+
+                <div>
+                    <label for="edit-client-area" class="block text-xs font-bold text-slate-700 mb-0.5">エリア（地名・地区）</label>
+                    <input type="text" id="edit-client-area" name="editClientArea" class="input-box w-full rounded-lg px-3 py-1.5 text-xs font-medium" placeholder="瑞江" required>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="col-span-2">
+                        <label for="edit-client-address" class="block text-xs font-bold text-slate-700 mb-0.5">住所詳細</label>
+                        <input type="text" id="edit-client-address" name="editClientAddress" class="input-box w-full rounded-lg px-3 py-1.5 text-xs font-medium" placeholder="住所詳細or建物名">
+                    </div>
+                    <div>
+                        <label for="edit-client-room" class="block text-xs font-bold text-slate-700 mb-0.5">部屋番号</label>
+                        <input type="text" id="edit-client-room" name="editClientRoom" class="input-box w-full rounded-lg px-3 py-1.5 text-xs font-medium" placeholder="101号室">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label for="edit-client-gender" class="block text-xs font-bold text-slate-700 mb-0.5">性別</label>
+                        <select id="edit-client-gender" name="editClientGender" class="input-box w-full rounded-lg px-3 py-1.5 text-xs font-medium">
+                            <option value="Unspecified">未選択 (Unspecified)</option>
+                            <option value="Male">男性 (Male)</option>
+                            <option value="Female">女性 (Female)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="edit-client-age" class="block text-xs font-bold text-slate-700 mb-0.5">年齢層</label>
+                        <select id="edit-client-age" name="editClientAge" class="input-box w-full rounded-lg px-3 py-1.5 text-xs font-medium">
+                            <option value="10s">10代</option>
+                            <option value="20s">20代</option>
+                            <option value="30s">30代</option>
+                            <option value="40s">40代</option>
+                            <option value="50s">50代</option>
+                            <option value="60s">60代</option>
+                            <option value="70s+">70代以上</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeEditClientModal()" class="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-bold transition">
+                        キャンセル
+                    </button>
+                    <button type="submit" class="px-4 py-1.5 bg-[#d91b42] hover:bg-[#b21333] text-white rounded-lg text-xs font-bold transition shadow-md">
+                        変更を保存
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT SINGLE VISIT RECORD MODAL -->
+    <div id="edit-visit-modal" onclick="handleOverlayClick(event, 'edit-visit-modal')" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3">
+        <div class="bg-white max-w-md w-full p-5 rounded-2xl border border-slate-200 shadow-2xl space-y-3 text-neutral-900 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-2">
+                <h3 class="text-base font-bold font-serif flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-[#d91b42]"></i> EDIT VISIT RECORD / 訪問記録の編集
+                </h3>
+                <button type="button" onclick="closeEditVisitModal()" class="text-slate-400 hover:text-slate-700">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="edit-visit-form" onsubmit="handleSaveVisitEdit(event)" class="space-y-3 text-left">
+                <input type="hidden" id="edit-visit-id">
+
+                <!-- VISIT DATE & TIME -->
+                <div class="bg-slate-100/80 p-2.5 rounded-lg border border-slate-200">
+                    <label for="edit-visit-date" class="block text-[10px] font-bold text-neutral-800 uppercase tracking-wider mb-0.5">
+                        VISIT DATE & TIME
+                    </label>
+                    <span class="block text-[9px] text-neutral-500 mb-1">訪問日時</span>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="date" id="edit-visit-date" name="editVisitDate" class="input-box w-full rounded-lg px-2.5 py-1.5 text-xs font-semibold" required>
+                        <input type="time" id="edit-visit-time" name="editVisitTime" value="14:00" class="input-box w-full rounded-lg px-2.5 py-1.5 text-xs font-semibold">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="edit-visit-type" class="block text-[10px] font-bold text-slate-700 mb-0.5">種別</label>
+                    <select id="edit-visit-type" name="editVisitType" class="input-box w-full rounded-lg px-2.5 py-1.5 text-xs font-semibold">
+                        <option value="Initial">初回 (Initial)</option>
+                        <option value="Re-visit">再訪問 (Re-visit)</option>
+                        <option value="Lesson">レッスン (Lesson)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="edit-visit-notes" class="block text-[10px] font-bold text-slate-700 mb-0.5">会話内容</label>
+                    <textarea id="edit-visit-notes" name="editVisitNotes" rows="3" class="input-box w-full rounded-lg p-2.5 text-xs font-medium custom-scrollbar" placeholder="会話の内容詳細"></textarea>
+                </div>
+
+                <div>
+                    <label for="edit-visit-next-plan" class="block text-[10px] font-bold text-slate-700 mb-0.5">次回の訪問内容・予定</label>
+                    <input type="text" id="edit-visit-next-plan" name="editVisitNextPlan" class="input-box w-full rounded-lg px-2.5 py-1.5 text-xs font-medium" placeholder="再訪問計画詳細">
+                </div>
+
+                <div>
+                    <label for="edit-visit-pdf" class="block text-[10px] font-bold text-slate-700 mb-0.5">関連資料 (PDF / 上限 1.5MB)</label>
+                    <input type="file" id="edit-visit-pdf" name="editVisitPdf" accept="application/pdf" class="text-xs text-slate-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:bg-[#d91b42] file:text-white cursor-pointer w-full">
+                    <span id="edit-visit-pdf-current" class="block text-[10px] text-slate-500 mt-1"></span>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeEditVisitModal()" class="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-bold transition">
+                        キャンセル
+                    </button>
+                    <button type="submit" class="px-4 py-1.5 bg-[#d91b42] hover:bg-[#b21333] text-white rounded-lg text-xs font-bold transition shadow-md">
+                        更新内容を保存
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CONFIRMATION MODAL DIALOG (YES / NO) -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3">
+        <div class="bg-white max-w-xs w-full p-5 rounded-2xl border border-slate-200 shadow-2xl text-center space-y-3">
+            <div class="w-10 h-10 rounded-xl bg-rose-100 text-[#d91b42] flex items-center justify-center mx-auto text-lg">
+                <i class="fa-solid fa-circle-question"></i>
+            </div>
+            <h3 id="confirm-modal-title" class="text-sm font-bold text-neutral-900">
+                Confirmation
+            </h3>
+            <p id="confirm-modal-msg" class="text-xs text-slate-600 leading-relaxed">
+                Are you sure you want to proceed?
+            </p>
+            
+            <div class="flex gap-2 justify-center pt-1">
+                <button type="button" id="confirm-btn-no" onclick="closeConfirmModal(false)" class="w-full py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-xs font-bold text-slate-700 transition">
+                    Cancel
+                </button>
+                <button type="button" id="confirm-btn-yes" onclick="closeConfirmModal(true)" class="w-full py-2 bg-[#d91b42] hover:bg-[#b21333] rounded-lg text-xs font-bold text-white transition shadow-md">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // UTILITIES (XSS Prevention & Local Date)
+        // ==========================================
+        
+        /**
+         * Strict HTML entity escaper to prevent XSS.
+         */
+        function escapeHTML(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        /**
+         * Get local YYYY-MM-DD date string using client time zone.
+         * Prevents UTC offset bugs (e.g., JST morning hours shifting back 1 day).
+         */
+        function getLocalDateString(d = new Date()) {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        /**
+         * Handles closing modal when clicking directly on the outer backdrop overlay.
+         */
+        function handleOverlayClick(event, modalId) {
+            if (event.target && event.target.id === modalId) {
+                if (modalId === 'detail-modal') closeDetailModal();
+                else if (modalId === 'backup-modal') closeBackupModal();
+                else if (modalId === 'edit-client-modal') closeEditClientModal();
+                else if (modalId === 'edit-visit-modal') closeEditVisitModal();
+            }
+        }
+
+        /**
+         * Helper: File to Base64 with size limit validation (max 1.5MB recommended for LocalStorage).
+         */
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                if (!file) {
+                    resolve({ name: null, data: null });
+                    return;
+                }
+                const maxSizeBytes = 1.5 * 1024 * 1024; // 1.5MB limit
+                if (file.size > maxSizeBytes) {
+                    showCustomAlert('ファイルエラー', 'ファイルサイズが大きすぎます (1.5MB以下にしてください)。');
+                    reject(new Error('File size exceeds maximum limit'));
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = () => resolve({ name: file.name, data: reader.result });
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        /**
+         * Opens PDF document safely in a new window/tab.
+         */
+        function openPdfDocument(base64Data, fileName) {
+            if (!base64Data) {
+                showCustomAlert('エラー', '添付PDFデータが見つかりません。');
+                return;
+            }
+            const win = window.open();
+            if (win) {
+                const safeTitle = escapeHTML(fileName || 'Document');
+                win.document.write(`
+                    <!DOCTYPE html>
+                    <html lang="ja">
+                        <head>
+                            <meta charset="UTF-8">
+                            <title>${safeTitle}</title>
+                        </head>
+                        <body style="margin:0; background:#121212;">
+                            <iframe src="${base64Data}" frameborder="0" style="width:100%; height:100vh;"></iframe>
+                        </body>
+                    </html>
+                `);
+            } else {
+                showCustomAlert('通知', 'ポップアップブロックが有効になっているためPDFを開けませんでした。');
+            }
+        }
+
+        // ==========================================
+        // APP STATE & STORAGE
+        // ==========================================
+        let contacts = [];
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        
+        let activeClientId = null;
+        let confirmResolver = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStoredContacts();
+            
+            const todayStr = getLocalDateString();
+            document.getElementById('entry-date').value = todayStr;
+            document.getElementById('followup-date').value = todayStr;
+
+            populateAreaOptions();
+            renderContactsList();
+            renderCalendar();
+        });
+
+        function loadStoredContacts() {
+            const stored = localStorage.getItem('tokyo_field_visits_data');
+            if (stored) {
+                try {
+                    contacts = JSON.parse(stored);
+                } catch(e) {
+                    console.error('Failed to parse localStorage data:', e);
+                    contacts = [];
+                }
+            } else {
+                contacts = [];
+                saveToLocalStorage();
+            }
+        }
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('tokyo_field_visits_data', JSON.stringify(contacts));
+            } catch (e) {
+                showCustomAlert(
+                    '保存失敗',
+                    'LocalStorageの容量上限に達したため保存できませんでした。不要なデータまたは高容量の添付PDFを削除してください。'
+                );
+            }
+        }
+
+        // Backup / Restore Modal
+        function triggerDataBackup() {
+            document.getElementById('backup-modal').classList.remove('hidden');
+        }
+        function closeBackupModal() {
+            document.getElementById('backup-modal').classList.add('hidden');
+        }
+
+        async function exportDataJSON() {
+            if (!contacts || contacts.length === 0) {
+                const proceed = await showConfirmModal('確認', 'データが登録されていませんが、空のバックアップを作成しますか？');
+                if (!proceed) return;
+            }
+
+            const jsonString = JSON.stringify(contacts, null, 2);
+            const fileName = `tokyo_contacts_backup_${getLocalDateString()}.json`;
+
+            // Modern File System Access API (if supported)
+            if ('showSaveFilePicker' in window) {
+                try {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: fileName,
+                        types: [{
+                            description: 'JSON Backup File',
+                            accept: { 'application/json': ['.json'] },
+                        }],
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(jsonString);
+                    await writable.close();
+                    showCustomAlert("成功", "データの保存が正常に完了しました。");
+                    return;
+                } catch (err) {
+                    if (err.name === 'AbortError') return; // User cancelled
+                    console.warn('FileSystemAccess API fallback triggered:', err);
+                }
+            }
+
+            // Fallback Blob Download for browser compatibility
+            try {
+                const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.href = url;
+                downloadAnchor.setAttribute("download", fileName);
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                
+                setTimeout(() => {
+                    document.body.removeChild(downloadAnchor);
+                    URL.revokeObjectURL(url);
+                }, 100);
+
+                showCustomAlert("成功", "データの保存（ダウンロード）を開始しました。");
+            } catch (err) {
+                console.error("Backup Export Error:", err);
+                showCustomAlert("エラー", "データの保存中に問題が発生しました。");
+            }
+        }
+
+        function importDataJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        contacts = imported;
+                        saveToLocalStorage();
+                        populateAreaOptions();
+                        renderContactsList();
+                        renderCalendar();
+                        showCustomAlert("成功", "データが正常に復元されました。");
+                        closeBackupModal();
+                    } else {
+                        showCustomAlert("エラー", "無効なファイル形式です。正確なバックアップJSONファイルを選択してください。");
+                    }
+                } catch (err) {
+                    showCustomAlert("エラー", "JSONファイルの読み込みに失敗しました。ファイルが破損している可能性があります。");
+                } finally {
+                    event.target.value = ''; // Reset input to allow re-uploading same file
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Google Maps Integration with Sanitization
+        function updateNewVisitMap() {
+            const addressInput = document.getElementById('entry-address').value.trim();
+            const placeholder = document.getElementById('new-visit-map-placeholder');
+            const iframe = document.getElementById('new-visit-map-iframe');
+            const linkElem = document.getElementById('google-maps-external-link');
+
+            if (addressInput.length > 0) {
+                const encodedAddress = encodeURIComponent(addressInput);
+                linkElem.href = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+                iframe.src = `https://maps.google.com/maps?q=${encodedAddress}&output=embed`;
+                iframe.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                linkElem.href = "https://www.google.com/maps";
+                iframe.src = "";
+                iframe.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
+        }
+
+        // Custom Safe Alert Replacement
+        function showCustomAlert(title, message) {
+            showConfirmModal(title, message, true);
+        }
+
+        // Confirmation Modal Dialog
+        function showConfirmModal(title, message, isAlertOnly = false) {
+            document.getElementById('confirm-modal-title').innerText = title;
+            document.getElementById('confirm-modal-msg').innerText = message;
+            
+            const btnNo = document.getElementById('confirm-btn-no');
+            if (isAlertOnly) {
+                btnNo.classList.add('hidden');
+            } else {
+                btnNo.classList.remove('hidden');
+            }
+
+            document.getElementById('confirm-modal').classList.remove('hidden');
+
+            return new Promise((resolve) => {
+                confirmResolver = resolve;
+            });
+        }
+
+        function closeConfirmModal(result) {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            if (confirmResolver) {
+                confirmResolver(result);
+                confirmResolver = null;
+            }
+        }
+
+        // Tab Navigation
+        function switchTab(tabName) {
+            const logSec = document.getElementById('view-log');
+            const listSec = document.getElementById('view-list');
+            const calSec = document.getElementById('view-calendar');
+
+            const btnLog = document.getElementById('tab-log-btn');
+            const btnList = document.getElementById('tab-list-btn');
+            const btnCal = document.getElementById('tab-calendar-btn');
+
+            [btnLog, btnList, btnCal].forEach(btn => {
+                btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-col items-center text-neutral-400 hover:text-white";
+            });
+
+            logSec.classList.add('hidden');
+            listSec.classList.add('hidden');
+            calSec.classList.add('hidden');
+
+            if (tabName === 'log') {
+                logSec.classList.remove('hidden');
+                btnLog.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-col items-center bg-[#d91b42] text-white shadow-md";
+            } else if (tabName === 'list') {
+                listSec.classList.remove('hidden');
+                btnList.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-col items-center bg-[#d91b42] text-white shadow-md";
+                populateAreaOptions();
+                renderContactsList();
+            } else if (tabName === 'calendar') {
+                calSec.classList.remove('hidden');
+                btnCal.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-col items-center bg-[#d91b42] text-white shadow-md";
+                renderCalendar();
+            }
+        }
+
+        // Record New Visit
+        async function handleNewVisitSubmit(e) {
+            e.preventDefault();
+
+            const confirmed = await showConfirmModal(
+                "新規訪問記録の保存", 
+                "この新しい訪問記録を保存してもよろしいですか？"
+            );
+            if (!confirmed) return;
+
+            const name = document.getElementById('entry-name').value.trim() || "名前なし";
+            const area = document.getElementById('entry-area').value.trim() || "未指定";
+            const address = document.getElementById('entry-address').value.trim() || "";
+            const room = document.getElementById('entry-room').value.trim() || "";
+            const type = document.getElementById('entry-type').value || "Initial";
+            const interest = document.getElementById('entry-interest').value || "C";
+            const gender = document.getElementById('entry-gender').value || "Unspecified";
+            const age = document.getElementById('entry-age').value || "50s";
+            const date = document.getElementById('entry-date').value || getLocalDateString();
+            const time = document.getElementById('entry-time').value || "";
+            const notes = document.getElementById('entry-notes').value.trim() || "（会話記録なし）";
+            const nextPlan = document.getElementById('entry-next-plan').value.trim();
+            
+            const pdfInput = document.getElementById('entry-pdf');
+            const pdfFile = pdfInput.files.length > 0 ? pdfInput.files[0] : null;
+
+            let pdfInfo = { name: null, data: null };
+            try {
+                if (pdfFile) {
+                    pdfInfo = await readFileAsBase64(pdfFile);
+                }
+            } catch (err) {
+                return; // Stop if file size exceeded
+            }
+
+            const newClient = {
+                id: "client-" + Date.now(),
+                name,
+                area,
+                address,
+                room,
+                gender,
+                age,
+                interest,
+                currentType: type,
+                scheduledForToday: false, // 初期設定はOFF
+                visits: [
+                    {
+                        visitId: "v-" + Date.now() + "-1",
+                        visitNumber: 1,
+                        date,
+                        time,
+                        type,
+                        notes,
+                        nextPlan,
+                        pdfName: pdfInfo.name,
+                        pdfData: pdfInfo.data
+                    }
+                ]
+            };
+
+            contacts.unshift(newClient);
+            saveToLocalStorage();
+
+            document.getElementById('new-visit-form').reset();
+            document.getElementById('entry-date').value = getLocalDateString();
+            document.getElementById('entry-time').value = "14:00";
+            updateNewVisitMap();
+
+            switchTab('list');
+        }
+
+        function getDaysElapsed(visitArray) {
+            if (!visitArray || visitArray.length === 0) return 0;
+            const dates = visitArray.map(v => new Date(v.date));
+            const latestDate = new Date(Math.max.apply(null, dates));
+            const now = new Date();
+            const diffTime = now.getTime() - latestDate.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 3600 * 24));
+            return diffDays < 0 ? 0 : diffDays;
+        }
+
+        /**
+         * Check if client is explicitly scheduled for today by user selection
+         */
+        function isClientScheduledToday(client) {
+            return !!(client && client.scheduledForToday);
+        }
+
+        /**
+         * Toggle today's schedule status from list or modal
+         */
+        function toggleTodaySchedule(clientId, event) {
+            if (event) {
+                event.stopPropagation(); // モーダルが開くのを防ぐ
+            }
+            const client = contacts.find(c => c.id === clientId);
+            if (!client) return;
+
+            client.scheduledForToday = !client.scheduledForToday;
+            saveToLocalStorage();
+
+            renderContactsList();
+            renderCalendar();
+
+            if (activeClientId === clientId) {
+                updateModalTodayBtn(client);
+            }
+        }
+
+        function toggleTodayScheduleFromModal() {
+            if (!activeClientId) return;
+            toggleTodaySchedule(activeClientId, null);
+        }
+
+        function updateModalTodayBtn(client) {
+            const btn = document.getElementById('modal-today-toggle-btn');
+            if (!btn) return;
+
+            if (isClientScheduledToday(client)) {
+                btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition flex items-center gap-1";
+                btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> 本日予定中`;
+            } else {
+                btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-200 hover:bg-rose-100 text-slate-700 hover:text-rose-700 border border-slate-300 transition flex items-center gap-1";
+                btn.innerHTML = `<i class="fa-solid fa-plus text-[#d91b42]"></i> 本日の予定に追加`;
+            }
+        }
+
+        function populateAreaOptions() {
+            const areaSelect = document.getElementById('sort-area');
+            const currentValue = areaSelect.value;
+            
+            const uniqueAreas = [...new Set(contacts.map(c => c.area))];
+            
+            areaSelect.innerHTML = `<option value="all">すべてのエリア</option>`;
+            uniqueAreas.forEach(a => {
+                const opt = document.createElement('option');
+                opt.value = a;
+                opt.innerText = a;
+                areaSelect.appendChild(opt);
+            });
+            areaSelect.value = currentValue;
+        }
+
+        function renderContactsList() {
+            const container = document.getElementById('contacts-container');
+            container.innerHTML = '';
+
+            const areaFilter = document.getElementById('sort-area').value;
+            const interestFilter = document.getElementById('sort-interest').value;
+            const sortMode = document.getElementById('sort-mode').value;
+            const searchQuery = document.getElementById('search-input').value.toLowerCase();
+
+            let filtered = contacts.filter(c => {
+                const matchesArea = (areaFilter === 'all' || c.area === areaFilter);
+                const matchesInterest = (interestFilter === 'all' || c.interest === interestFilter);
+                const matchesSearch = (c.name || '').toLowerCase().includes(searchQuery) || 
+                                      (c.area || '').toLowerCase().includes(searchQuery) ||
+                                      (c.address || '').toLowerCase().includes(searchQuery);
+                return matchesArea && matchesInterest && matchesSearch;
+            });
+
+            filtered.sort((a, b) => {
+                if (sortMode === 'today') {
+                    const aToday = isClientScheduledToday(a) ? 1 : 0;
+                    const bToday = isClientScheduledToday(b) ? 1 : 0;
+                    if (aToday !== bToday) return bToday - aToday;
+                    return getDaysElapsed(a.visits) - getDaysElapsed(b.visits);
+                } else if (sortMode === 'priority') {
+                    const aIsLesson = a.currentType === 'Lesson' ? 1 : 0;
+                    const bIsLesson = b.currentType === 'Lesson' ? 1 : 0;
+                    if (aIsLesson !== bIsLesson) return bIsLesson - aIsLesson;
+                    return (a.interest || '').localeCompare(b.interest || '');
+                } else if (sortMode === 'area') {
+                    return (a.area || '').localeCompare(b.area || '', 'ja');
+                } else if (sortMode === 'interest') {
+                    return (a.interest || '').localeCompare(b.interest || '');
+                } else if (sortMode === 'elapsed') {
+                    return getDaysElapsed(b.visits) - getDaysElapsed(a.visits);
+                }
+                return 0;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-10 text-slate-400">
+                        <i class="fa-solid fa-folder-open text-2xl mb-1 text-slate-300"></i>
+                        <p class="text-xs font-bold">該当する訪問先データがありません。</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(client => {
+                const elapsed = getDaysElapsed(client.visits);
+                const isToday = isClientScheduledToday(client);
+                const elapsedText = elapsed === 0 ? "今日記録" : `${elapsed}日前`;
+
+                let typeBadge = '';
+                if (client.currentType === 'Lesson') {
+                    typeBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#d91b42] text-white shrink-0 whitespace-nowrap">レッスン</span>`;
+                } else if (client.currentType === 'Initial') {
+                    typeBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 shrink-0 whitespace-nowrap">初回</span>`;
+                } else {
+                    typeBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-300 shrink-0 whitespace-nowrap">再訪問</span>`;
+                }
+
+                // Subtle Gender Accent Border (Left side border)
+                let genderAccentClass = "border-l-4 border-l-slate-300";
+                if (client.gender === 'Male') {
+                    genderAccentClass = "border-l-4 border-l-sky-400";
+                } else if (client.gender === 'Female') {
+                    genderAccentClass = "border-l-4 border-l-rose-300";
+                }
+
+                // Interactive Today Schedule Toggle Button
+                const todayBtnHTML = isToday
+                    ? `<button type="button" onclick="toggleTodaySchedule('${escapeHTML(client.id)}', event)" class="px-2 py-1 rounded-md text-[10px] font-black bg-rose-600 text-white hover:bg-rose-700 shadow-xs transition shrink-0 whitespace-nowrap flex items-center gap-1" title="本日の予定から解除">
+                        <i class="fa-solid fa-check text-[9px]"></i> 本日予定中
+                       </button>`
+                    : `<button type="button" onclick="toggleTodaySchedule('${escapeHTML(client.id)}', event)" class="px-2 py-1 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-700 border border-slate-300 hover:border-rose-300 transition shrink-0 whitespace-nowrap flex items-center gap-1" title="本日の予定に追加">
+                        <i class="fa-solid fa-plus text-[9px] text-[#d91b42]"></i> 本日予定
+                       </button>`;
+
+                const cardStyle = isToday
+                    ? `bg-rose-50/90 border-2 border-[#d91b42] ${genderAccentClass} shadow-xs hover:shadow-md cursor-pointer transition flex justify-between items-center group rounded-lg px-3 py-2`
+                    : `bg-white rounded-lg px-3 py-2 border border-slate-200 ${genderAccentClass} shadow-2xs hover:border-[#d91b42] hover:shadow-xs cursor-pointer transition flex justify-between items-center group`;
+
+                const row = document.createElement('div');
+                row.className = cardStyle;
+                row.onclick = () => openDetailModal(client.id);
+
+                row.innerHTML = `
+                    <div class="flex items-center gap-2 overflow-hidden min-w-0">
+                        ${todayBtnHTML}
+                        <span class="text-[10px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 shrink-0 font-mono max-w-[80px] truncate">
+                            ${escapeHTML(client.area)}
+                        </span>
+                        <h3 class="text-xs font-bold text-neutral-900 group-hover:text-[#d91b42] transition font-serif truncate">
+                            ${escapeHTML(client.name)}
+                        </h3>
+                        ${typeBadge}
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0 ml-2">
+                        <span class="text-[9px] font-bold text-slate-500 bg-slate-100 border-slate-200 font-mono px-1.5 py-0.5 rounded border whitespace-nowrap">
+                            <i class="fa-regular fa-clock text-[8px] mr-0.5 text-[#d91b42]"></i>${escapeHTML(elapsedText)}
+                        </span>
+                        <div class="text-slate-400 group-hover:text-[#d91b42] transition text-xs">
+                            <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(row);
+            });
+        }
+
+        function openDetailModal(clientId) {
+            activeClientId = clientId;
+            const client = contacts.find(c => c.id === clientId);
+            if (!client) return;
+
+            document.getElementById('modal-client-name').innerText = client.name || '---';
+            document.getElementById('modal-client-id').innerText = client.id || '---';
+            
+            updateModalTodayBtn(client);
+            
+            const areaStr = escapeHTML(client.area || '未指定');
+            const addressStr = escapeHTML(client.address || '住所未登録');
+            const roomStr = client.room ? ` ${escapeHTML(client.room)}` : '';
+            const fullAddressStr = `${addressStr}${roomStr}`;
+
+            document.getElementById('modal-client-area').innerHTML = `<i class="fa-solid fa-location-dot text-[#d91b42]"></i> ${areaStr} - ${fullAddressStr}`;
+            document.getElementById('modal-client-address').innerText = fullAddressStr;
+            
+            let genderDisplay = `<span class="text-slate-600">未選択</span>`;
+            if (client.gender === 'Male') {
+                genderDisplay = `<span class="inline-flex items-center gap-1 text-sky-700 font-bold"><span class="w-2 h-2 rounded-full bg-sky-400 inline-block"></span>男性</span>`;
+            } else if (client.gender === 'Female') {
+                genderDisplay = `<span class="inline-flex items-center gap-1 text-rose-700 font-bold"><span class="w-2 h-2 rounded-full bg-rose-400 inline-block"></span>女性</span>`;
+            }
+
+            const ageStr = escapeHTML(client.age || '未選択');
+            document.getElementById('modal-client-demographics').innerHTML = `${genderDisplay} / <span>${ageStr}</span>`;
+            
+            const gmapBtn = document.getElementById('modal-google-maps-link');
+            if (gmapBtn) {
+                const targetAddress = client.address || client.area;
+                if (targetAddress) {
+                    const encodedAddress = encodeURIComponent(targetAddress);
+                    gmapBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+                    gmapBtn.classList.remove('hidden');
+                } else {
+                    gmapBtn.classList.add('hidden');
+                }
+            }
+
+            const modalMapIframe = document.getElementById('modal-visit-map-iframe');
+            if (modalMapIframe) {
+                if (client.address || client.area) {
+                    const encodedAddress = encodeURIComponent(client.address || client.area);
+                    modalMapIframe.src = `https://maps.google.com/maps?q=${encodedAddress}&output=embed`;
+                    modalMapIframe.classList.remove('hidden');
+                } else {
+                    modalMapIframe.classList.add('hidden');
+                }
+            }
+
+            const elapsed = getDaysElapsed(client.visits);
+            document.getElementById('modal-client-elapsed').innerText = `${elapsed}日前`;
+
+            document.getElementById('modal-interest-select').value = client.interest || 'C';
+
+            const badge = document.getElementById('modal-client-type-badge');
+            if (client.currentType === 'Lesson') {
+                badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[#d91b42] text-white";
+                badge.innerText = "レッスン";
+            } else if (client.currentType === 'Initial') {
+                badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-100 text-amber-900 border border-amber-300";
+                badge.innerText = "初回";
+            } else {
+                badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-sky-100 text-sky-800 border border-sky-300";
+                badge.innerText = "再訪問";
+            }
+
+            renderVisitHistoryList(client);
+            document.getElementById('detail-modal').classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+            activeClientId = null;
+            renderContactsList();
+            renderCalendar();
+        }
+
+        function renderVisitHistoryList(client) {
+            const container = document.getElementById('visit-history-list');
+            container.innerHTML = '';
+
+            const sortedVisits = [...client.visits].sort((a, b) => a.visitNumber - b.visitNumber);
+
+            sortedVisits.forEach((visit) => {
+                const item = document.createElement('div');
+                item.className = "bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5 relative";
+
+                let badgeStyle = 'bg-sky-100 text-sky-800 border-sky-300';
+                if (visit.type === 'Lesson') badgeStyle = 'bg-[#d91b42] text-white border-[#d91b42]';
+                else if (visit.type === 'Initial') badgeStyle = 'bg-amber-100 text-amber-900 border-amber-300';
+
+                const displayTime = visit.time || '時刻未指定';
+
+                const safeClientId = escapeHTML(client.id);
+                const safeVisitId = escapeHTML(visit.visitId);
+
+                item.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-slate-200 pb-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase border ${badgeStyle}">
+                                ${visit.type === 'Initial' ? '初回' : visit.type === 'Lesson' ? 'レッスン' : '再訪問'}
+                            </span>
+                            <span class="text-xs font-bold text-slate-700 font-mono">
+                                ${escapeHTML(visit.date)} (${escapeHTML(displayTime)})
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="openEditVisitModal('${safeClientId}', '${safeVisitId}')" class="text-slate-400 hover:text-[#d91b42] text-xs p-1 transition" title="この訪問記録を編集">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button type="button" onclick="confirmDeleteSingleVisit('${safeClientId}', '${safeVisitId}')" class="text-slate-400 hover:text-[#d91b42] text-xs p-1 transition" title="この訪問記録を削除">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="text-xs text-neutral-800 pt-0.5">
+                        <p class="font-bold text-slate-500 text-[9px] uppercase mb-0.5">CONVERSATION NOTES</p>
+                        <p class="bg-white p-2.5 rounded-lg border border-slate-200 whitespace-pre-wrap font-sans text-neutral-800 leading-relaxed">${escapeHTML(visit.notes)}</p>
+                    </div>
+
+                    ${visit.nextPlan ? `
+                    <div class="text-xs text-neutral-800 pt-0.5">
+                        <p class="font-bold text-[#d91b42] text-[9px] uppercase mb-0.5">NEXT ACTION PLAN</p>
+                        <p class="bg-white/80 p-2 rounded-lg border border-slate-200 text-neutral-700">${escapeHTML(visit.nextPlan)}</p>
+                    </div>` : ''}
+
+                    ${visit.pdfName ? `
+                    <div class="pt-0.5 flex items-center justify-between text-xs text-[#d91b42] font-bold">
+                        <span class="flex items-center gap-1.5 truncate">
+                            <i class="fa-solid fa-file-pdf text-[11px] shrink-0"></i>
+                            <span class="truncate">Attached PDF: ${escapeHTML(visit.pdfName)}</span>
+                        </span>
+                        ${visit.pdfData ? `
+                        <button type="button" onclick="openPdfDocument('${escapeHTML(visit.pdfData)}', '${escapeHTML(visit.pdfName)}')" class="px-2 py-0.5 bg-rose-50 hover:bg-rose-100 border border-rose-300 text-rose-800 text-[10px] rounded font-bold transition shrink-0 ml-2">
+                            <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>閲覧
+                        </button>` : ''}
+                    </div>` : ''}
+                `;
+
+                container.appendChild(item);
+            });
+        }
+
+        function updateClientInterestLevel() {
+            if (!activeClientId) return;
+            const newInterest = document.getElementById('modal-interest-select').value;
+            const client = contacts.find(c => c.id === activeClientId);
+            if (client) {
+                client.interest = newInterest;
+                saveToLocalStorage();
+                renderContactsList();
+                renderCalendar();
+            }
+        }
+
+        // Add Subsequent Visit Form Handler
+        async function handleFollowupSubmit(e) {
+            e.preventDefault();
+            if (!activeClientId) return;
+
+            const client = contacts.find(c => c.id === activeClientId);
+            if (!client) return;
+
+            const date = document.getElementById('followup-date').value || getLocalDateString();
+            const time = document.getElementById('followup-time').value || "";
+            const type = document.getElementById('followup-type').value || "Re-visit";
+            const notes = document.getElementById('followup-notes').value.trim() || "（会話記録なし）";
+            const nextPlan = document.getElementById('followup-next-plan').value.trim();
+            
+            const pdfInput = document.getElementById('followup-pdf');
+            const pdfFile = pdfInput.files.length > 0 ? pdfInput.files[0] : null;
+
+            let pdfInfo = { name: null, data: null };
+            try {
+                if (pdfFile) {
+                    pdfInfo = await readFileAsBase64(pdfFile);
+                }
+            } catch (err) {
+                return;
+            }
+
+            const newVisit = {
+                visitId: "v-" + Date.now() + "-" + (client.visits.length + 1),
+                visitNumber: client.visits.length + 1,
+                date,
+                time,
+                type,
+                notes,
+                nextPlan,
+                pdfName: pdfInfo.name,
+                pdfData: pdfInfo.data
+            };
+
+            client.visits.push(newVisit);
+            client.currentType = type;
+
+            saveToLocalStorage();
+            document.getElementById('followup-form').reset();
+            document.getElementById('followup-date').value = getLocalDateString();
+            document.getElementById('followup-time').value = "14:00";
+            openDetailModal(client.id);
+            renderContactsList();
+            renderCalendar();
+        }
+
+        // Edit Client Basic Info Logic
+        function openEditClientModal() {
+            if (!activeClientId) return;
+            const client = contacts.find(c => c.id === activeClientId);
+            if (!client) return;
+
+            document.getElementById('edit-client-name').value = client.name || '';
+            document.getElementById('edit-client-area').value = client.area || '';
+            document.getElementById('edit-client-address').value = client.address || '';
+            document.getElementById('edit-client-room').value = client.room || '';
+            document.getElementById('edit-client-gender').value = client.gender || 'Unspecified';
+            document.getElementById('edit-client-age').value = client.age || '50s';
+
+            document.getElementById('edit-client-modal').classList.remove('hidden');
+        }
+
+        function closeEditClientModal() {
+            document.getElementById('edit-client-modal').classList.add('hidden');
+        }
+
+        async function handleSaveClientBasicInfo(e) {
+            e.preventDefault();
+            if (!activeClientId) return;
+
+            const client = contacts.find(c => c.id === activeClientId);
+            if (!client) return;
+
+            client.name = document.getElementById('edit-client-name').value.trim() || '名前なし';
+            client.area = document.getElementById('edit-client-area').value.trim() || '未指定';
+            client.address = document.getElementById('edit-client-address').value.trim() || '';
+            client.room = document.getElementById('edit-client-room').value.trim() || '';
+            client.gender = document.getElementById('edit-client-gender').value;
+            client.age = document.getElementById('edit-client-age').value;
+
+            saveToLocalStorage();
+            populateAreaOptions();
+            openDetailModal(client.id);
+            renderContactsList();
+            renderCalendar();
+            closeEditClientModal();
+        }
+
+        // Edit Single Visit Record
+        function openEditVisitModal(clientId, visitId) {
+            const client = contacts.find(c => c.id === clientId);
+            if (!client) return;
+
+            const visit = client.visits.find(v => v.visitId === visitId);
+            if (!visit) return;
+
+            document.getElementById('edit-visit-id').value = visitId;
+            document.getElementById('edit-visit-date').value = visit.date || '';
+            document.getElementById('edit-visit-time').value = visit.time || '14:00';
+            document.getElementById('edit-visit-type').value = visit.type || 'Re-visit';
+            document.getElementById('edit-visit-notes').value = visit.notes || '';
+            document.getElementById('edit-visit-next-plan').value = visit.nextPlan || '';
+            
+            const pdfInput = document.getElementById('edit-visit-pdf');
+            if (pdfInput) pdfInput.value = '';
+
+            const currentPdfLabel = document.getElementById('edit-visit-pdf-current');
+            if (currentPdfLabel) {
+                currentPdfLabel.innerText = visit.pdfName ? `現在の添付: ${visit.pdfName}` : '現在添付ファイルはありません';
+            }
+
+            document.getElementById('edit-visit-modal').classList.remove('hidden');
+        }
+
+        function closeEditVisitModal() {
+            document.getElementById('edit-visit-modal').classList.add('hidden');
+        }
+
+        async function handleSaveVisitEdit(e) {
+            e.preventDefault();
+            if (!activeClientId) return;
+
+            const client = contacts.find(c => c.id === activeClientId);
+            if (!client) return;
+
+            const visitId = document.getElementById('edit-visit-id').value;
+            const visit = client.visits.find(v => v.visitId === visitId);
+            if (!visit) return;
+
+            visit.date = document.getElementById('edit-visit-date').value || getLocalDateString();
+            visit.time = document.getElementById('edit-visit-time').value || '';
+            visit.type = document.getElementById('edit-visit-type').value || 'Re-visit';
+            visit.notes = document.getElementById('edit-visit-notes').value.trim() || '（会話記録なし）';
+            visit.nextPlan = document.getElementById('edit-visit-next-plan').value.trim();
+
+            const pdfInput = document.getElementById('edit-visit-pdf');
+            if (pdfInput && pdfInput.files.length > 0) {
+                try {
+                    const pdfInfo = await readFileAsBase64(pdfInput.files[0]);
+                    visit.pdfName = pdfInfo.name;
+                    visit.pdfData = pdfInfo.data;
+                } catch (err) {
+                    return;
+                }
+            }
+
+            if (client.visits.length > 0) {
+                client.currentType = client.visits[client.visits.length - 1].type;
+            }
+
+            saveToLocalStorage();
+            openDetailModal(client.id);
+            renderContactsList();
+            renderCalendar();
+            closeEditVisitModal();
+        }
+
+        // Deletion Operations
+        async function confirmDeleteClient() {
+            if (!activeClientId) return;
+            const client = contacts.find(c => c.id === activeClientId);
+            if (!client) return;
+
+            const confirmed = await showConfirmModal(
+                "プロファイルの削除",
+                `「${client.name}」様の全記録を削除してもよろしいですか？この操作は取り消せません。`
+            );
+            if (!confirmed) return;
+
+            contacts = contacts.filter(c => c.id !== activeClientId);
+            saveToLocalStorage();
+            closeDetailModal();
+            populateAreaOptions();
+            renderContactsList();
+            renderCalendar();
+        }
+
+        async function confirmDeleteSingleVisit(clientId, visitId) {
+            const client = contacts.find(c => c.id === clientId);
+            if (!client) return;
+
+            const confirmed = await showConfirmModal(
+                "訪問記録の削除",
+                "この訪問記録を削除してもよろしいですか？"
+            );
+            if (!confirmed) return;
+
+            client.visits = client.visits.filter(v => v.visitId !== visitId);
+            client.visits.forEach((v, idx) => v.visitNumber = idx + 1);
+            if (client.visits.length > 0) {
+                client.currentType = client.visits[client.visits.length - 1].type;
+            }
+
+            saveToLocalStorage();
+            openDetailModal(client.id);
+            renderContactsList();
+            renderCalendar();
+        }
+
+        // Calendar Logic
+        function changeMonth(dir) {
+            currentMonth += dir;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            const monthTitle = document.getElementById('calendar-month-title');
+            monthTitle.innerText = `${currentYear}年 ${currentMonth + 1}月`;
+
+            // Monday-first offset calculation
+            const firstDayRaw = new Date(currentYear, currentMonth, 1).getDay();
+            const startOffset = (firstDayRaw + 6) % 7;
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            for (let i = 0; i < startOffset; i++) {
+                const empty = document.createElement('div');
+                empty.className = "min-h-[55px] sm:min-h-[65px] bg-slate-100/40 border border-slate-200/50 rounded-lg p-1 text-slate-300 text-[8px]";
+                grid.appendChild(empty);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                const matchedVisits = [];
+                contacts.forEach(client => {
+                    if (client.visits && Array.isArray(client.visits)) {
+                        client.visits.forEach(v => {
+                            if (v.date === dateStr) {
+                                matchedVisits.push({ client, visit: v });
+                            }
+                        });
+                    }
+                });
+
+                const cell = document.createElement('div');
+                cell.className = "min-h-[55px] sm:min-h-[65px] bg-white border border-slate-200 rounded-lg p-1 flex flex-col justify-between hover:border-[#d91b42] transition shadow-2xs";
+                
+                let visitsHTML = '';
+                matchedVisits.forEach(({ client, visit }) => {
+                    let styleClass = 'text-sky-800 bg-sky-50 border-sky-200 hover:bg-sky-100';
+                    if (visit.type === 'Lesson') {
+                        styleClass = 'text-[#d91b42] bg-rose-50 border-rose-200 hover:bg-rose-100';
+                    } else if (visit.type === 'Initial') {
+                        styleClass = 'text-amber-800 bg-amber-50 border-amber-200 hover:bg-amber-100';
+                    }
+
+                    // Subtle Gender Border Accent on Calendar Chips
+                    let calendarGenderBorder = "";
+                    if (client.gender === 'Male') {
+                        calendarGenderBorder = "border-l-2 border-l-sky-400";
+                    } else if (client.gender === 'Female') {
+                        calendarGenderBorder = "border-l-2 border-l-rose-400";
+                    }
+
+                    const interestChar = escapeHTML(client.interest || 'C');
+                    const safeClientId = escapeHTML(client.id);
+
+                    visitsHTML += `
+                        <div onclick="openDetailModal('${safeClientId}')" title="${escapeHTML(client.name)} (${escapeHTML(client.area)}) - ${visit.type === 'Initial' ? '初回' : visit.type === 'Lesson' ? 'レッスン' : '再訪問'}" class="${styleClass} ${calendarGenderBorder} border text-[8px] font-bold px-1 py-0.5 rounded flex items-center justify-between cursor-pointer hover:scale-[1.02] transition my-0.5 w-full gap-0.5 shadow-2xs">
+                            <span class="truncate leading-tight">${escapeHTML(client.name)}</span>
+                            <span class="font-mono font-black text-[8px] opacity-75 shrink-0 leading-none">(${interestChar})</span>
+                        </div>
+                    `;
+                });
+
+                cell.innerHTML = `
+                    <div class="flex justify-between items-center text-[9px] mb-0.5">
+                        <span class="font-extrabold text-neutral-800 font-mono text-[9px] leading-none">${day}</span>
+                        ${matchedVisits.length > 0 ? `<span class="text-[8px] text-[#d91b42] font-black bg-rose-50 px-1 py-0.2 rounded-full border border-rose-200 leading-none">${matchedVisits.length}</span>` : ''}
+                    </div>
+                    <div class="flex flex-col gap-0.5 items-stretch overflow-y-auto max-h-10 sm:max-h-12 custom-scrollbar flex-grow">
+                        ${visitsHTML}
+                    </div>
+                `;
+
+                grid.appendChild(cell);
+            }
+        }
+    </script>
+</body>
+</html>
